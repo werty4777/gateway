@@ -121,7 +121,7 @@ public class GoogleTokenServices implements ResourceServerTokenServices {
     private Access getUserInfo(String accessToken) {
 
         System.out.println(accessToken);
-        Access access = this.iAccess.findByToken(accessToken).orElseThrow(() -> {
+        Access access = this.iAccess.findByToken(accessToken).<UnapprovedClientAuthenticationException>orElseThrow(() -> {
              throw new UnapprovedClientAuthenticationException("Este token no sirve ga.");
         });
 
