@@ -14,7 +14,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.client.RestTemplate;
 
 
-@EntityScan({"com.commons.user.models.entity"})
+@EntityScan({"com.commons.user.models.entity", "com.argo.gateway"})
 @EnableZuulProxy
 @EnableCircuitBreaker
 @EnableFeignClients
