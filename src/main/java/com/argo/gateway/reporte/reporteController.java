@@ -5,10 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
@@ -33,10 +30,10 @@ public class reporteController {
 
     }
 
-    @PostMapping("")
-    public ResponseEntity<?> generarPdf(HttpServletRequest request) {
+    @GetMapping("/{token}")
+    public ResponseEntity<?> generarPdf(@PathVariable("token")String token) {
 
-        String token = request.getHeader("Authorization");
+        //String token = request.getHeader("Authorization");
 
         HttpHeaders headers = new HttpHeaders();
         Date date=new Date();
@@ -48,7 +45,7 @@ public class reporteController {
                 .ok()
                 .headers(headers)
                 .contentType(MediaType.APPLICATION_PDF)
-                .body(this.reporteService.generarPdf(token));
+                .body(this.reporteService.generarPdf("Bearer "+token));
 
 
     }
