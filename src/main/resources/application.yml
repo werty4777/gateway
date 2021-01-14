@@ -3,13 +3,6 @@ zuul:
   host:
     socketTimeoutMillis: 1000000
     connect-timeout-millis: 90000
-  routes:
-    inventario-service:
-      path: /inventario/**
-      serviceId: inventario-service
-    inventario-service-movil:
-      path: /api/inventario/**
-      serviceId: inventario-service
 eureka:
   client:
     serviceUrl:
