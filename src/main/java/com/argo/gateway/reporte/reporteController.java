@@ -11,7 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 
 @RestController
-@RequestMapping("/inventario/reporte")
+@RequestMapping("/reporte")
 public class reporteController {
 
     @Autowired
