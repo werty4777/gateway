@@ -7,6 +7,7 @@ import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.data.JRAbstractBeanDataSource;
 import net.sf.jasperreports.engine.data.JRBeanArrayDataSource;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ResourceUtils;
@@ -14,6 +15,7 @@ import org.springframework.util.ResourceUtils;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -29,8 +31,8 @@ public class pdfGenerator {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         List<DetallesReporteModelo> detalles = reporteModelo.getDetalles();
         try {
-            File file = ResourceUtils.getFile("classpath:reporte.jrxml");
-            JasperReport jasperReport = JasperCompileManager.compileReport(file.getAbsolutePath());
+            InputStream inputStream = new ClassPathResource("reporte.jrxml").getInputStream();
+            JasperReport jasperReport = JasperCompileManager.compileReport(inputStream);
             JRBeanCollectionDataSource tableDataset = new JRBeanCollectionDataSource(reporteModelo.getDetalles());
 
 
