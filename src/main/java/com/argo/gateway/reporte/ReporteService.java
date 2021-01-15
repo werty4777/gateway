@@ -1,6 +1,7 @@
 package com.argo.gateway.reporte;
 
 import com.argo.gateway.almacen.domain.repository.IAlmacen;
+import com.argo.gateway.movimientos.domain.enm.estadoMovimiento;
 import com.argo.gateway.movimientos.domain.repository.IEntrada;
 import com.argo.gateway.movimientos.domain.repository.IEntradaDetalles;
 import com.argo.gateway.movimientos.domain.repository.ISalida;
@@ -64,19 +65,18 @@ public class ReporteService {
 
 
             List<DetallesReporteModelo> detalleReporte = this.iCodigoProducto.findAll().stream().map(codigoProducto -> {
-
                 int entrada = 0;
                 int salida = 0;
                 int stock = 0;
                 System.out.println(codigoProducto);
-                BigDecimal bigDecimal1 = this.iEntradaDetalles.sumaTotales(almacen.getIdAlmacen(), codigoProducto.getCodigo());
+                BigDecimal bigDecimal1 = this.iEntradaDetalles.sumaTotales(almacen.getIdAlmacen(), codigoProducto.getCodigo(), estadoMovimiento.ENTREGADO);
                 BigDecimal sumaTotales = bigDecimal1 == null ? BigDecimal.ZERO : bigDecimal1;
 
                 System.out.println(sumaTotales);
-                BigDecimal bigDecimal2 = this.iEntradaDetalles.misEntradasDetalles(almacen, codigoProducto);
+                BigDecimal bigDecimal2 = this.iEntradaDetalles.misEntradasDetalles(almacen, codigoProducto, estadoMovimiento.ENTREGADO);
                 entrada = bigDecimal2 == null ? 0 : bigDecimal2.intValue();
                 System.out.println(entrada);
-                BigDecimal bigDecimal3 = this.iSalidaDetalles.misSalidas(almacen, codigoProducto);
+                BigDecimal bigDecimal3 = this.iSalidaDetalles.misSalidas(almacen, codigoProducto,estadoMovimiento.ESPERA_CONFIRMACION);
                 salida = bigDecimal3 == null ? 0 : bigDecimal3.intValue();
                 System.out.println(salida);
                 stock = entrada - salida;
@@ -86,15 +86,15 @@ public class ReporteService {
                 System.out.println(pukardex);
                 BigDecimal existenciasEntradas = sumaTotales;
                 System.out.println(existenciasEntradas);
-                BigDecimal bigDecimal = this.iSalidaDetalles.sumaSalida(almacen, codigoProducto);
-                BigDecimal existenciasSalidas = this.iSalidaDetalles.sumaSalida(almacen, codigoProducto) == null ? BigDecimal.ZERO : bigDecimal;
+                BigDecimal bigDecimal = this.iSalidaDetalles.sumaSalida(almacen, codigoProducto ,estadoMovimiento.ESPERA_CONFIRMACION);
+                BigDecimal existenciasSalidas = this.iSalidaDetalles.sumaSalida(almacen, codigoProducto,estadoMovimiento.ESPERA_CONFIRMACION) == null ? BigDecimal.ZERO : bigDecimal;
                 System.out.println(existenciasSalidas);
                 BigDecimal totalExistencias = existenciasEntradas.subtract(existenciasSalidas);
                 System.out.println(totalExistencias);
 
                 if(entrada==0 && salida==0){
 
-                return null;
+                    return null;
                 }
 
                 return new DetallesReporteModelo(

@@ -19,7 +19,7 @@ public class notificacionesController {
     public ResponseEntity<?> misNotificaciones(@RequestBody RequerimientoDTO requerimientoDTO, @PathVariable("id") int tipo) {
 
 
-        this.notificacionesService.sendNotification(tipo, requerimientoDTO);
+        this.notificacionesService.sendNotification(tipo, requerimientoDTO,null);
 
         return new ResponseEntity<>(HttpStatus.OK);
 

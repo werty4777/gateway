@@ -91,7 +91,7 @@ public class RequerimientoService {
             RequerimientoDTO requerimientoDTO = new RequerimientoDTO(requerimiento.getCodigoRequerimiento(), requerimiento.getAlmacenRecibe().getIdAlmacen(), requerimiento.getTipoRequerimiento());
 
 
-            this.sendNotification(requerimientoDTO, 1);
+            this.sendNotification(requerimientoDTO, 1,null);
             return save;
 
         } catch (Exception ex) {
@@ -169,7 +169,7 @@ public class RequerimientoService {
             Requerimiento save = this.iRequerimiento.save(requerimiento);
             RequerimientoDTO requerimientoDTO = new RequerimientoDTO(requerimiento.getCodigoRequerimiento(), requerimiento.getAlmacenRecibe().getIdAlmacen(), requerimiento.getTipoRequerimiento());
 
-            this.sendNotification(requerimientoDTO, 2);
+            this.sendNotification(requerimientoDTO, 2,save);
             return save;
 
 
@@ -212,7 +212,7 @@ public class RequerimientoService {
                 RequerimientoDTO requerimientoDTO = new RequerimientoDTO(requerimiento.getCodigoRequerimiento(), requerimiento.getAlmacenRecibe().getIdAlmacen(), requerimiento.getTipoRequerimiento());
 
 
-                this.sendNotification(requerimientoDTO, 3);
+                this.sendNotification(requerimientoDTO, 3,null);
                 return save1;
             } else {
 
@@ -328,7 +328,7 @@ public class RequerimientoService {
     }
 
     @Async("poolnotification")
-    public void sendNotification(RequerimientoDTO requerimientoDTO, int op) {
-        this.simpMessagingTemplate.sendNotification(op, requerimientoDTO);
+    public void sendNotification(RequerimientoDTO requerimientoDTO, int op,Requerimiento requerimiento) {
+        this.simpMessagingTemplate.sendNotification(op, requerimientoDTO,requerimiento);
     }
 }

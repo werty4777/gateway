@@ -1,36 +1,51 @@
 package com.argo.gateway.notificaciones.application;
 
 
+import com.argo.gateway.notificaciones.application.dto.Push;
 import com.argo.gateway.notificaciones.application.dto.RequerimientoDTO;
 import com.argo.gateway.notificaciones.domain.INotificaciones;
 import com.argo.gateway.notificaciones.domain.Notificaciones;
 import com.argo.gateway.notificaciones.domain.enm.estadoNotificacion;
 import com.argo.gateway.notificaciones.infrastructure.api.dto.mensaje;
+import com.argo.gateway.requerimiento.domain.Requerimiento;
 import com.argo.gateway.requerimiento.domain.enm.TipoRequerimiento;
+import com.argo.gateway.user.domain.repository.IAccess;
+import com.commons.user.models.entity.accessUser.domain.Access;
+import com.commons.user.models.entity.user.domain.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
 public class NotificacionesService {
 
-
+    private final IAccess iAccess;
     private final String GENERAL = "/secured/user/queue/specific-user/nuevo/";
     private final String TRASLADO = "/secured/user/queue/specific-user/";
     private final INotificaciones iNotificaciones;
+    private final RestTemplate restTemplate;
     @Autowired
     SimpMessagingTemplate simpMessagingTemplate;
 
 
     @Autowired
-    public NotificacionesService(INotificaciones iNotificaciones) {
+    public NotificacionesService(IAccess iAccess, INotificaciones iNotificaciones, RestTemplate restTemplate) {
+        this.iAccess = iAccess;
 
         this.iNotificaciones = iNotificaciones;
 
+        this.restTemplate = restTemplate;
     }
 
     @Transactional
@@ -98,11 +113,51 @@ public class NotificacionesService {
         this.simpMessagingTemplate.convertAndSend(GENERAL + s, collect);
     }
 
-    private void enviarNotificacionConfirmacion(RequerimientoDTO requerimiento) {
+    private void enviarNotificacionConfirmacion(RequerimientoDTO requerimiento,Requerimiento requerimientos) {
         String url = "";
         if (requerimiento.getTipoRequerimiento() == TipoRequerimiento.NECESIDAD) {
             url = TRASLADO;
             this.removerNotificacion(requerimiento.getCodigoRequerimiento());
+
+            List<Access> accesses = this.buscarUsuariosPorRequerimiento(requerimiento.getCodigoRequerimiento(),requerimientos);
+
+            for (Access access : accesses) {
+
+                Map<String, Object> body = new HashMap<>();
+
+                Map<String, Object> notification = new HashMap<>();
+                notification.put("body", "  ");
+                notification.put("title", "Solicitud de requerimiento");
+                body.put("notification", notification);
+                body.put("priority", "high");
+                Push push = new Push();
+                push.setMensaje("Tu requerimiento fue confirmado");
+                push.setCodigoRequerimiento(requerimiento.getCodigoRequerimiento());
+                body.put("data", push);
+
+
+                body.put("to", access.getSessionId());
+                String urls = "https://fcm.googleapis.com/fcm/send";
+
+                HttpHeaders headers = new HttpHeaders();
+                headers.add("Authorization ", "Bearer AAAAh9jU3jo:APA91bF-f1Sq97C1FHgFVxLaiy3GAprO_jy61HWGWRWUGbHY644GG08LjPPd1-ARyTj2ggNNXZ0TJB3JWz77_w9TYS-oLcbZe02b34E5Aa2mPDWSxuZKGl2LnrjJIYhXgY8hThT6rko7");
+                headers.add("Content-Type", "application/json");
+
+
+                HttpEntity<?> requestEntity =
+                        new HttpEntity<>(body, headers);
+
+
+                System.out.println("cacaaa");
+                ResponseEntity<Map> exchange = this.restTemplate.exchange(urls, HttpMethod.POST, requestEntity,
+                        Map.class);
+                exchange.getBody().forEach((o, o2) -> {
+                    System.out.println(o);
+                    System.out.println(o2);
+                });
+            }
+
+
         }
         if (requerimiento.getTipoRequerimiento() == TipoRequerimiento.NOSTOCK) {
             url = GENERAL;
@@ -147,7 +202,7 @@ public class NotificacionesService {
     }
 
 
-    public void sendNotification(int id, RequerimientoDTO requerimientoDTO) {
+    public void sendNotification(int id, RequerimientoDTO requerimientoDTO,Requerimiento requerimiento) {
 
         switch (id) {
 
@@ -157,7 +212,7 @@ public class NotificacionesService {
 
 
             case 2:
-                this.enviarNotificacionConfirmacion(requerimientoDTO);
+                this.enviarNotificacionConfirmacion(requerimientoDTO,requerimiento);
                 break;
 
             case 3:
@@ -171,6 +226,22 @@ public class NotificacionesService {
 
 
         }
+
+    }
+
+
+    public List<Access> buscarUsuariosPorRequerimiento(String codigo,Requerimiento requerimiento) {
+
+
+
+
+        User requeridoPor = requerimiento.getRequeridoPor();
+
+        return this.iAccess.findBySub(requeridoPor.getIdUser());
+
+
+
+
 
     }
 }

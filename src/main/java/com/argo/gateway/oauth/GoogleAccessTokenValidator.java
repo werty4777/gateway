@@ -99,6 +99,7 @@ public class GoogleAccessTokenValidator {
                 dd.setEmail(map.get("email").toString());
                 dd.setAccess_type(map.get("access_type").toString());
                 dd.setSub(map.get("sub").toString());
+                dd.setSessionId("null");
                 Date date = new Date();
 
                 Access save = this.iAccess.save(dd);
